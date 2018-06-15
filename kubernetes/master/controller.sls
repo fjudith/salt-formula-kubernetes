@@ -1,6 +1,7 @@
 {%- from "kubernetes/map.jinja" import master with context %}
 {%- from "kubernetes/map.jinja" import common with context %}
 {%- from "kubernetes/map.jinja" import version %}
+{%- from "kubernetes/map.jinja" import full_version %}
 {%- if master.enabled %}
 
 {%- if master.auth.get('token', {}).enabled|default(True) %}
@@ -93,6 +94,8 @@ kubernetes_basic_auth:
     - group: root
     - mode: 644
     - contents: >-
+        # Using hyperkube version v{{ full_version }}
+
         DAEMON_ARGS="
         --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass
         --allow-privileged=True
@@ -147,7 +150,7 @@ kubernetes_basic_auth:
 {%- if salt['pkg.version_cmp'](version,'1.8') >= 0 %}
         --feature-gates=MountPropagation=true
 {%- endif %}
-{%- if version|float >= 1.9 %}
+{%- if salt['pkg.version_cmp'](version,'1.9') >= 0 %}
         --endpoint-reconciler-type={{ master.apiserver.get('endpoint-reconciler', 'lease') }}
 {%- else %}
         --apiserver-count={{ master.apiserver.get('count', 1) }}
@@ -179,6 +182,8 @@ kubernetes_basic_auth:
     - group: root
     - mode: 644
     - contents: >-
+        # Using hyperkube version v{{ full_version }}
+
         DAEMON_ARGS="
         --cluster-name=kubernetes
         --kubeconfig /etc/kubernetes/controller-manager.kubeconfig
@@ -207,6 +212,8 @@ kubernetes_basic_auth:
     - group: root
     - mode: 644
     - contents: >-
+        # Using hyperkube version v{{ full_version }}
+
         DAEMON_ARGS="
         --kubeconfig /etc/kubernetes/scheduler.kubeconfig
         --leader-elect=true
